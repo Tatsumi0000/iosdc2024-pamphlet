@@ -5,7 +5,7 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     xdvik-ja \ 
     evince \
     texlive-lang-cjk \
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     xzdec \
     texlive-latex-extra \
-    && apt-get clean \
+    && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN tlmgr init-usertree
