@@ -15,18 +15,18 @@ Dockerイメージは、[ubuntu-texlive-ja](https://hub.docker.com/r/korosuke613
 
 ## setup
 
-1. `git clone https://github.com/korosuke613/texlive-ja-devcontainer-template.git`
-2. VS Codeで`texlive-ja-devcontainer-template`を開く。
+1. `git clone https://github.com/Tatsumi0000/iosdc2024-pamphlet.git`
+2. VS Codeで`iosdc2024-pamphlet`を開く。
 3. 拡張機能[Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack)を追加する。
 4. 左下の`><`アイコンを押して、`Rebuild Container`を実行する。
 5. 待つ。
-6. ワークスペースが開いたら、terminalを開き、`latexmk sample.tex`を実行する。
+6. ワークスペースが開いたら、terminalを開き、`latexmk iosdc2024.tex`を実行する。
 7. 上手くコンパイルできたらsetup完了！
 
 ## build
 
 ```bash
-latexmk sample.tex
+latexmk iosdc2024.tex
 ```
 
-`sample.pdf`という実行ファイルができているはず。
+`iosdc2024.pdf`という実行ファイルができているはず。
