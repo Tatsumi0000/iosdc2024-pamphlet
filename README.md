@@ -9,7 +9,7 @@ VS Code Remote Developmentの機能を用いて、LaTeX環境を容易に構築�
 
 
 
-Dockerイメージは、[ubuntu-texlive-ja](https://hub.docker.com/r/korosuke613/ubuntu-texlive-ja)を利用しています。
+Dockerイメージは、[iosdc2024-pamphlet/texlive-ja](https://github.com/Tatsumi0000/iosdc2024-pamphlet/pkgs/container/iosdc2024-pamphlet%2Ftexlive-ja)を利用しています。
 
 (**Dockerが必要です**)
 
