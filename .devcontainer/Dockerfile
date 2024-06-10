@@ -1,6 +1,4 @@
-FROM korosuke613/ubuntu-texlive-ja:latest
-
-MAINTAINER Futa HIRAKOBA
+FROM ghcr.io/tatsumi0000/iosdc2024-pamphlet/texlive-ja:latest
 
 RUN apt-get update && apt-get install -y \
     git \
