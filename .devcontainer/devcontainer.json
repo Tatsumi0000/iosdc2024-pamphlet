@@ -1,14 +1,12 @@
 {
-    "name": "ubuntu-texlive-ja",
-    "dockerComposeFile": "compose.yml",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "james-yu.latex-workshop"
-            ]
-        }
-    },
-    "service": "ubuntu-texlive-ja",
-    "workspaceFolder": "/workdir",
-    "shutdownAction": "stopCompose"
+  "name": "ubuntu-texlive-ja",
+  "dockerComposeFile": "compose.yml",
+  "customizations": {
+    "vscode": {
+      "extensions": ["james-yu.latex-workshop", "eamodio.gitlens"]
+    }
+  },
+  "service": "ubuntu-texlive-ja",
+  "workspaceFolder": "/workdir",
+  "shutdownAction": "stopCompose"
 }
