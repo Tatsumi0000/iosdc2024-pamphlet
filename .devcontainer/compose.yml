@@ -1,6 +1,8 @@
 services:
   ubuntu-texlive-ja:
-    image: ghcr.io/tatsumi0000/iosdc2024-pamphlet/texlive-ja:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: sleep infinity
     volumes:
       - ../:/workdir
