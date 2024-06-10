@@ -1,8 +1,12 @@
+
+# iosdc2024-pamphlet
+
+[iOSDC2024](https://iosdc.jp/2024/)のパンフレットを書くために、[korosuke613/texlive-ja-devcontainer-template](https://github.com/korosuke613/texlive-ja-devcontainer-template)をもとに最新のVS Codeのdevcontainerで動くようにしたリポジトリです。
+
 # texlive-ja-devcontainer-template
 
 VS Code Remote Developmentの機能を用いて、LaTeX環境を容易に構築するサンプルコードです。
 
-[![](https://images.microbadger.com/badges/image/korosuke613/ubuntu-texlive-ja-devcontainer.svg)](https://microbadger.com/images/korosuke613/ubuntu-texlive-ja-devcontainer "Get your own image badge on microbadger.com")
 
 
 Dockerイメージは、[ubuntu-texlive-ja](https://hub.docker.com/r/korosuke613/ubuntu-texlive-ja)を利用しています。
