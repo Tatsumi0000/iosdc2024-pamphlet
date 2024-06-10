@@ -1,6 +1,6 @@
 {
     "name": "ubuntu-texlive-ja",
-    "dockerComposeFile": "docker-compose.yml",
+    "dockerComposeFile": "compose.yml",
     "extensions": [
         "formulahendry.terminal",
         "james-yu.latex-workshop"

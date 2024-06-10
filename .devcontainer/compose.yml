@@ -1,8 +1,6 @@
-version: "3"
 services:
   ubuntu-texlive-ja:
-    image: korosuke613/ubuntu-texlive-ja-devcontainer
-    #build: .
+    image: ghcr.io/tatsumi0000/iosdc2024-pamphlet/texlive-ja:latest
     command: sleep infinity
     volumes:
       - ../:/workdir
