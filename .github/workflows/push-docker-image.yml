@@ -3,7 +3,7 @@ name: Push Docker image to GitHub Packages
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - "texlive-ja.Dockerfile"
   workflow_dispatch:
