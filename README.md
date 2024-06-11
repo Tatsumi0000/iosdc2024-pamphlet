@@ -30,3 +30,8 @@ latexmk iosdc2024.tex
 ```
 
 `iosdc2024.pdf`という実行ファイルができているはず。
+
+`bibtex`を生成するには以下のコマンドを実行後`latexmk`コマンドを実行してください。
+```bash
+bibtex iosdc2024
+```
