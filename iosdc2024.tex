@@ -20,7 +20,7 @@
 
 
 \section{はじめに}\label{sec:intro}
-私は普段Google IMEを使っているのですが、英単語を補完してくれず、私が英単語を覚えるのが苦手なのも相まっていつも誤字脱字をしがちです。そこで、この課題を解決するために、英単語を補完するmacOS上で動作するIME、Raelize（れりーず）を開発しました。
+私は普段Google IMEを使っているのですが、英単語をいい感じに補完してくれず、私が英単語を覚えるのが苦手なのも相まっていつも誤字脱字をしがちです。そこで、この課題を解決するために、英単語を補完するmacOS上で動作するIME、Raelize（れりーず）を開発しました。
 
 Raelizeを開発するために、Appleが公式で提供しているInputMethodKit\cite{bib:about_inputmethodkit}を使って開発しました。実際に開発をしていく上で、ロジックが集中するIMKInputControllerにコードが集中し、コードの見通しが悪くなるという課題がありました。この課題に対しては、The Composable Architecture（TCA）\cite{bib:the_composable_architecture}を適用し解決しました。
 他にも、IME開発特有のデバッグの煩わしさもあり、この課題に対しては、Raelizeをマルチモジュール構成にすることでデバッグ専用アプリの開発を容易にしたり、fastlane\cite{bib:fastlane}を用いた効率的なデバッグを行いました。
@@ -28,7 +28,7 @@ Raelizeを開発するために、Appleが公式で提供しているInputMethod
 これらの開発体験を踏まえて本稿では、InputMethodKitとTCAを使ったIME開発や、マルチモジュール構成とfastlaneを用いた効率的なデバッグについて説明します。
 
 本稿の構成は以下の通りです。
-第\ref{sec:constract}章では今回開発したRaelizeの概要について説明します。第\ref{sec:abount_inputmethodkit}章ではInputMethodKitについて説明します。第\ref{sec:the_composable_architecture}章ではThe Composable Architecture（TCA）について説明します。第\ref{sec:use_imk_and_tca}章ではInputMethodKitとTCAを使ったIME開発について説明します。第\ref{sec:multi_module_and_fastlane}章ではマルチモジュール構成とfastlaneを用いた効率的なデバッグについて説明します。第\ref{sec:conclusion}章では本稿のまとめと今後の課題を示します。
+第\ref{sec:abount_inputmethodkit}章ではInputMethodKitについて説明します。第\ref{sec:the_composable_architecture}章ではThe Composable Architecture（TCA）について説明します。第\ref{sec:use_imk_and_tca}章ではInputMethodKitとTCAを使ったIME開発について説明します。第\ref{sec:multi_module_and_fastlane}章ではマルチモジュール構成とfastlaneを用いた効率的なデバッグについて説明します。第\ref{sec:conclusion}章では本稿のまとめと今後の課題を示します。
 
 % ~~~を第3章~~~について説明します。\cite{Hoge}の引用です。
 % \begin{figure}[t]
@@ -42,11 +42,26 @@ Raelizeを開発するために、Appleが公式で提供しているInputMethod
 % パソコンの前でご飯を食べることはよくある。パソコンの前でご飯を食べる人のイラストを図\ref{fig:syokuji_computer}に示す。
 % このイラストは、規約の範囲内であれば、個人、法人、商用、非商用問わず無料で利用できることでおなじみの、{\bf かわいいフリー素材 いらすとや}\cite{bib:about_inputmethodkit}より引用した。
 
-\section{Raelize}\label{sec:constract}
-今回開発したRaelizeの構成について述べます。
-
 \section{InputMethodKit}\label{sec:abount_inputmethodkit}
-InputMethodKitについて述べます。
+InputMethodKitについて説明します。
+
+InputMethodKitは、macOSでIMEを開発するためのフレームワークで、macOSのIMEとして動作するアプリケーションを開発することができます。
+
+InputMethodKitは、主に以下の3つのクラスを使って開発します。
+\begin{itemize}
+    \item IMKServer
+    \begin{itemize}
+        \item 入力メソッドへのクライアント接続を管理するクラス\cite{bib:imkserver}
+    \end{itemize}
+    \item IMKCandidates
+    \begin{itemize}
+        \item 候補ウィンドウを表示するためのクラス\cite{bib:imk_candidates}
+    \end{itemize}
+    \item IMKInputController
+    \begin{itemize}
+        \item 候補ウィンドウを表示するためのクラス\cite{bib:imk_input_controller}
+    \end{itemize}
+\end{itemize}
 
 \subsection{IMKInputController}\label{sec:imkInput_controller}
 IMKInputControllerについて述べます。
