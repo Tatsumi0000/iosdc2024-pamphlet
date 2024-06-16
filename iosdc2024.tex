@@ -10,54 +10,22 @@
 \usepackage{url} % urlを参考文献で出力したいから使う
 \usepackage{comment}
 \usepackage{textcomp} % > などの記号を出力
-\usepackage{listings} % ソースコードを表示
-\usepackage{xcolor} % ソースコードの色付け
 \usepackage{here} % 画像を強制的に指定した箇所に出力
+\usepackage{minted} % ソースコードのシンタックスハイライト
+\usepackage{mdframed}
 % 図の上下に微妙な隙間が出るので対策
-\setlength\intextsep{0pt}
+\setlength\intextsep{3pt}
 \setlength\textfloatsep{0pt}
 
-\renewcommand{\lstlistingname}{コード} % キャプション名をコードに変更
+\renewcommand{\listingscaption}{コード}  % キャプション名をコードに変更
 
-% Swiftのシンタックスハイライト
-% https://gist.github.com/chriseidhof/18dbc1c4eef919eab2c7
-\lstdefinelanguage{swift}
-{
-  morekeywords={
-    func,if,then,else,for,in,while,do,switch,case,default,where,break,continue,fallthrough,return,
-    typealias,struct,class,enum,protocol,var,func,let,get,set,willSet,didSet,inout,init,deinit,extension,
-    subscript,prefix,operator,infix,postfix,precedence,associativity,left,right,none,convenience,dynamic,
-    final,lazy,mutating,nonmutating,optional,override,required,static,unowned,safe,weak,internal,
-    private,public,is,as,self,unsafe,dynamicType,true,false,nil,Type,Protocol,
-  },
-  morecomment=[l]{//}, % l is for line comment
-  morecomment=[s]{///}, % l is for line comment
-  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
-  morestring=[b]" % defines that strings are enclosed in double quotes
-}
-
-\definecolor{keyword}{HTML}{BA2CA3}
-\definecolor{string}{HTML}{D12F1B}
-\definecolor{comment}{HTML}{008400}
-
-\lstset{
-  language=swift,
-  basicstyle=\ttfamily,
-  showstringspaces=false, % lets spaces in strings appear as real spaces
-  columns=fixed,
-  keepspaces=true,
-  breaklines=true,
-  keywordstyle=\color{keyword},
-  stringstyle=\color{string},
-  commentstyle=\color{comment},
-}
 
 \begin{document}
 
 
 \title{\vspace{-10mm}InputMethodKitとTCAを使ったmacOS上で動作するIMEの開発}
 \author{Tatsumi0000}
-\date{\vspace{-15mm}}
+\date{\vspace{-10mm}}
 \maketitle
 
 \section{はじめに}\label{sec:intro}
@@ -90,17 +58,6 @@ InputMethodKitは、主に以下の3つのクラスを使って開発します�
     \end{itemize}
 \end{itemize}
 
-次にIMKInputControllerでよく使うメソッドについて述べます。
-\subsubsection{handle(\_ event: NSEvent!, client sender: Any!) -\texttt{>} Bool}
-
-
-\subsubsection{candidates(\_ sender: Any!) -\texttt{>} [Any]!}
-
-\subsubsection{candidateSelected(\_ candidateString: NSAttributedString!)}
-
-\subsubsection{candidateSelectionChanged(\_ candidateString: NSAttributedString!)}
-
-
 
 \section{The Composable Architecture}\label{sec:the_composable_architecture}
 The Composable Architecture（TCA）について述べます。TCAは、Point-Freeが開発しているライブラリで一貫性のあるコードを書くことができます。TCAは、UIKitやSwiftUIを使っていないアプリケーションに対しても適用が可能で、今回はIMKInputControllerにコードが集中するという課題を解決するために使用しました。
@@ -108,9 +65,8 @@ The Composable Architecture（TCA）について述べます。TCAは、Point-Fr
 \section{InputMethodKitとTCAを使ったIME開発}\label{sec:use_imk_and_tca}
 InputMethodKitとTCAを使ったIME開発について述べます。IMKInputControllerのイニシャライザでTCAのStateを監視し、状態に応じてIMKCandidatesを操作しました。コード\ref{listings:state}に、RealizeでのState、コード\ref{listings:initial_state}にIMKInputControllerのイニシャライザでStateを監視するコード例を示します。
 
-\begin{figure}[H]\label{listings:state}
-\centering %\vspace{-5mm}
-\begin{lstlisting}[caption=RealizeでのState例,language=swift]
+\begin{listing}[h]
+  \begin{minted}[breaklines]{swift}
 @ObservableState
 public struct State: Equatable {
   /// IME の入力モード
@@ -128,27 +84,55 @@ public struct State: Equatable {
   /// IME に対してユーザが起こしたイベント
   var candidateEvent: NSEvent? = nil
 }
-\end{lstlisting}
-\end{figure}
+  \end{minted}
+  \caption{RealizeでのState例}\label{listings:state}
+\end{listing}
 
-\begin{figure}[h]\label{listings:initial_state}
-\centering
-\begin{lstlisting}[caption=IMKInputControllerのイニシャライザでのStateを監視する例,language=swift]
+\begin{listing}[H]
+  \begin{minted}[breaklines]{swift}
 initialState: RaelizeIMKReducer.State(raelizeState: .inputMode),
   reducer: { RaelizeIMKReducer() })
   observe {
-    // ユーザが未入力or補完候補がない場合は候補ウィンドウを非表示
+    // ユーザが未入力もしくは補完候補がない場合は候補ウィンドウを非表示
     if self.store.candinates.isEmpty || self.store.inputWord.isEmpty {
       self.candidates.hide()
-    // それ以外の場合は候補ウィンドウ内容を更新してから表示
+    // 候補ウィンドウ内容を更新してから表示
     } else {
       self.candidates.update()
       self.candidates.show()
     }
   }
-\end{lstlisting}
-\end{figure}
-\vspace{-1mm}
+  \end{minted}
+  \caption{IMKInputControllerのイニシャライザでのStateを監視する例}\label{listings:initial_state}
+\end{listing}
+次にIMKInputControllerでよく使うメソッドと、どのようにTCAを組み合わせて実装したか述べます。
+\subsubsection{handle(\_ event: NSEvent!, client sender: Any!) -\texttt{>} Bool}
+このメソッドは、ユーザがキーボードを操作した際に呼ばれるメソッドです。eventにユーザが操作したイベントが格納されているので、このイベントに応じてRaelizeStateの状態を切り替え、
+
+
+\begin{listing}[h]
+  \begin{minted}[breaklines]{swift}
+public override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+  guard let event = event else { return false }
+  // 受け取ったイベントに応じて状態を切り替える Action を呼び出す
+  store.send(.handleRaelizeState(event))
+  switch store.raelizeState {
+  // 何もないモード
+  case .neutralMode:
+    return false
+  // 文字入力 or 補完ウィンドウ操作モード  
+  case .inputMode, .operationMode:
+    return true
+  }
+}
+  \end{minted}
+  \caption{IMKInputControllerのイニシャライザでのStateを監視する例}\label{listings:handle}
+\end{listing}
+\subsubsection{candidates(\_ sender: Any!) -\texttt{>} [Any]!}
+
+\subsubsection{candidateSelected(\_ candidateString: NSAttributedString!)}
+
+\subsubsection{candidateSelectionChanged(\_ candidateString: NSAttributedString!)}
 
 
 \section{マルチモジュール構成とfastlaneを用いた効率的なデバッグ}\label{sec:multi_module_and_fastlane}
