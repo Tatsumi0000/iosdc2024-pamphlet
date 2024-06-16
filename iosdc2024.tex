@@ -1,4 +1,4 @@
-\documentclass[uplatex,a4j,12pt]{jsarticle}
+\documentclass[uplatex,a4j,12pt,twocolumn]{jsarticle}
 
 \renewcommand{\baselinestretch}{0.8}
 % 縦横のサイズ調整
@@ -9,6 +9,48 @@
 \usepackage{bmpsize}
 \usepackage{url} % urlを参考文献で出力したいから使う
 \usepackage{comment}
+\usepackage{textcomp} % > などの記号を出力
+\usepackage{listings} % ソースコードを表示
+\usepackage{xcolor} % ソースコードの色付け
+\usepackage{here} % 画像を強制的に指定した箇所に出力
+% 図の上下に微妙な隙間が出るので対策
+\setlength\intextsep{0pt}
+\setlength\textfloatsep{0pt}
+
+\renewcommand{\lstlistingname}{コード} % キャプション名をコードに変更
+
+% Swiftのシンタックスハイライト
+% https://gist.github.com/chriseidhof/18dbc1c4eef919eab2c7
+\lstdefinelanguage{swift}
+{
+  morekeywords={
+    func,if,then,else,for,in,while,do,switch,case,default,where,break,continue,fallthrough,return,
+    typealias,struct,class,enum,protocol,var,func,let,get,set,willSet,didSet,inout,init,deinit,extension,
+    subscript,prefix,operator,infix,postfix,precedence,associativity,left,right,none,convenience,dynamic,
+    final,lazy,mutating,nonmutating,optional,override,required,static,unowned,safe,weak,internal,
+    private,public,is,as,self,unsafe,dynamicType,true,false,nil,Type,Protocol,
+  },
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{///}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+\definecolor{keyword}{HTML}{BA2CA3}
+\definecolor{string}{HTML}{D12F1B}
+\definecolor{comment}{HTML}{008400}
+
+\lstset{
+  language=swift,
+  basicstyle=\ttfamily,
+  showstringspaces=false, % lets spaces in strings appear as real spaces
+  columns=fixed,
+  keepspaces=true,
+  breaklines=true,
+  keywordstyle=\color{keyword},
+  stringstyle=\color{string},
+  commentstyle=\color{comment},
+}
 
 \begin{document}
 
@@ -18,34 +60,19 @@
 \date{\vspace{-15mm}}
 \maketitle
 
-
 \section{はじめに}\label{sec:intro}
 私は普段Google IMEを使っているのですが、英単語をいい感じに補完してくれず、私が英単語を覚えるのが苦手なのも相まっていつも誤字脱字をしがちです。そこで、この課題を解決するために、英単語を補完するmacOS上で動作するIME、Raelize（れりーず）を開発しました。
 
 Raelizeを開発するために、Appleが公式で提供しているInputMethodKit\cite{bib:about_inputmethodkit}を使って開発しました。実際に開発をしていく上で、ロジックが集中するIMKInputControllerにコードが集中し、コードの見通しが悪くなるという課題がありました。この課題に対しては、The Composable Architecture（TCA）\cite{bib:the_composable_architecture}を適用し解決しました。
 他にも、IME開発特有のデバッグの煩わしさもあり、この課題に対しては、Raelizeをマルチモジュール構成にすることでデバッグ専用アプリの開発を容易にしたり、fastlane\cite{bib:fastlane}を用いた効率的なデバッグを行いました。
 
-これらの開発体験を踏まえて本稿では、InputMethodKitとTCAを使ったIME開発や、マルチモジュール構成とfastlaneを用いた効率的なデバッグについて説明します。
+これらの開発体験を踏まえて本稿では、InputMethodKitとTCAを使ったIME開発や、マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。
 
 本稿の構成は以下の通りです。
-第\ref{sec:abount_inputmethodkit}章ではInputMethodKitについて説明します。第\ref{sec:the_composable_architecture}章ではThe Composable Architecture（TCA）について説明します。第\ref{sec:use_imk_and_tca}章ではInputMethodKitとTCAを使ったIME開発について説明します。第\ref{sec:multi_module_and_fastlane}章ではマルチモジュール構成とfastlaneを用いた効率的なデバッグについて説明します。第\ref{sec:conclusion}章では本稿のまとめと今後の課題を示します。
-
-% ~~~を第3章~~~について説明します。\cite{Hoge}の引用です。
-% \begin{figure}[t]
-%     \begin{center}
-%         \includegraphics[width=7cm]{image/syokuji_computer.png}
-%         \caption{パソコンの前でご飯を食べる人のイラスト}
-%         \label{fig:syokuji_computer}
-%     \end{center}
-% \end{figure}
-
-% パソコンの前でご飯を食べることはよくある。パソコンの前でご飯を食べる人のイラストを図\ref{fig:syokuji_computer}に示す。
-% このイラストは、規約の範囲内であれば、個人、法人、商用、非商用問わず無料で利用できることでおなじみの、{\bf かわいいフリー素材 いらすとや}\cite{bib:about_inputmethodkit}より引用した。
+第\ref{sec:abount_inputmethodkit}章ではInputMethodKitについて述べます。第\ref{sec:the_composable_architecture}章ではThe Composable Architecture（TCA）について述べます。第\ref{sec:use_imk_and_tca}章ではInputMethodKitとTCAを使ったIME開発について述べます。第\ref{sec:multi_module_and_fastlane}章ではマルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。第\ref{sec:conclusion}章では本稿のまとめと今後の課題を示します。
 
 \section{InputMethodKit}\label{sec:abount_inputmethodkit}
-InputMethodKitについて説明します。
-
-InputMethodKitは、macOSでIMEを開発するためのフレームワークで、macOSのIMEとして動作するアプリケーションを開発することができます。
+InputMethodKitについて述べます。InputMethodKitは、macOSでIMEを開発するためのフレームワークで、macOSのIMEとして動作するアプリケーションを開発することができます。
 
 InputMethodKitは、主に以下の3つのクラスを使って開発します。
 \begin{itemize}
@@ -59,18 +86,70 @@ InputMethodKitは、主に以下の3つのクラスを使って開発します�
     \end{itemize}
     \item IMKInputController
     \begin{itemize}
-        \item 候補ウィンドウを表示するためのクラス\cite{bib:imk_input_controller}
+        \item 入力メソッドのテキスト入力を制御するクラス\cite{bib:imk_input_controller}
     \end{itemize}
 \end{itemize}
 
-\subsection{IMKInputController}\label{sec:imkInput_controller}
-IMKInputControllerについて述べます。
+次にIMKInputControllerでよく使うメソッドについて述べます。
+\subsubsection{handle(\_ event: NSEvent!, client sender: Any!) -\texttt{>} Bool}
+
+
+\subsubsection{candidates(\_ sender: Any!) -\texttt{>} [Any]!}
+
+\subsubsection{candidateSelected(\_ candidateString: NSAttributedString!)}
+
+\subsubsection{candidateSelectionChanged(\_ candidateString: NSAttributedString!)}
+
+
 
 \section{The Composable Architecture}\label{sec:the_composable_architecture}
-The Composable Architecture（TCA）について述べます。
+The Composable Architecture（TCA）について述べます。TCAは、Point-Freeが開発しているライブラリで一貫性のあるコードを書くことができます。TCAは、UIKitやSwiftUIを使っていないアプリケーションに対しても適用が可能で、今回はIMKInputControllerにコードが集中するという課題を解決するために使用しました。
 
 \section{InputMethodKitとTCAを使ったIME開発}\label{sec:use_imk_and_tca}
-InputMethodKitとTCAを使ったIME開発について述べます。
+InputMethodKitとTCAを使ったIME開発について述べます。IMKInputControllerのイニシャライザでTCAのStateを監視し、状態に応じてIMKCandidatesを操作しました。コード\ref{listings:state}に、RealizeでのState、コード\ref{listings:initial_state}にIMKInputControllerのイニシャライザでStateを監視するコード例を示します。
+
+\begin{figure}[H]\label{listings:state}
+\centering %\vspace{-5mm}
+\begin{lstlisting}[caption=RealizeでのState例,language=swift]
+@ObservableState
+public struct State: Equatable {
+  /// IME の入力モード
+  var raelizeState: RaelizeState
+  /// ユーザに表示する補完候補一覧
+  var candinates: [String] = []
+  /// ユーザが入力している文字
+  var inputWord: String = ""
+  /// 単語リストのファイル名
+  var fileName: String = ""
+  /// ユーザが選択した補完候補
+  var insertText: String = ""
+  /// ユーザが選択した補完候補の文字列
+  var selectedWord: String = ""
+  /// IME に対してユーザが起こしたイベント
+  var candidateEvent: NSEvent? = nil
+}
+\end{lstlisting}
+\end{figure}
+
+\begin{figure}[h]\label{listings:initial_state}
+\centering
+\begin{lstlisting}[caption=IMKInputControllerのイニシャライザでのStateを監視する例,language=swift]
+initialState: RaelizeIMKReducer.State(raelizeState: .inputMode),
+  reducer: { RaelizeIMKReducer() })
+  observe {
+    // ユーザが未入力or補完候補がない場合は候補ウィンドウを非表示
+    if self.store.candinates.isEmpty || self.store.inputWord.isEmpty {
+      self.candidates.hide()
+    // それ以外の場合は候補ウィンドウ内容を更新してから表示
+    } else {
+      self.candidates.update()
+      self.candidates.show()
+    }
+  }
+\end{lstlisting}
+\end{figure}
+\vspace{-1mm}
+
 
 \section{マルチモジュール構成とfastlaneを用いた効率的なデバッグ}\label{sec:multi_module_and_fastlane}
 マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。
