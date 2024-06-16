@@ -8,5 +8,5 @@
 *.bbl
 *.blg
 *.out
-
+_minted-*
 .DS_Store
