@@ -1,6 +1,6 @@
 FROM ghcr.io/tatsumi0000/iosdc2024-pamphlet/texlive-ja:latest
 
-RUN apt update && apt install -y \
+RUN apt update && apt upgrade -y && apt install -y \
     git \
     cpanminus \
     texlive-extra-utils \
