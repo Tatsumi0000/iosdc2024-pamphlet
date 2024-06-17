@@ -48,6 +48,7 @@ InputMethodKitは、主に以下の3つのクラスを使って開発します�
     \begin{itemize}
         \item 入力メソッドへのクライアント接続を管理するクラス\cite{bib:imkserver}
     \end{itemize}
+    \newpage
     \item IMKCandidates
     \begin{itemize}
         \item 候補ウィンドウを表示するためのクラス\cite{bib:imk_candidates}
@@ -107,9 +108,7 @@ initialState: RaelizeIMKReducer.State(raelizeState: .inputMode),
 \end{listing}
 次にIMKInputControllerでよく使うメソッドと、どのようにTCAを組み合わせて実装したか述べます。
 \subsubsection{handle(\_ event: NSEvent!, client sender: Any!) -\texttt{>} Bool}
-このメソッドは、ユーザがキーボードを操作した際に呼ばれるメソッドです。eventにユーザが操作したイベントが格納されているので、このイベントに応じてRaelizeStateの状態を切り替え、
-
-
+このメソッドは、ユーザがキーボードを操作した際に呼ばれるメソッドです。eventにユーザが操作したイベントが格納されているので、このイベントに応じてIMEの状態（RaelizeState）を切り替えます。コード\ref{listings:handle}に、コード例を示します。
 \begin{listing}[h]
   \begin{minted}[breaklines]{swift}
 public override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
@@ -126,17 +125,53 @@ public override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
   }
 }
   \end{minted}
-  \caption{IMKInputControllerのイニシャライザでのStateを監視する例}\label{listings:handle}
+  \caption{handleのコード例}\label{listings:handle}
 \end{listing}
+
 \subsubsection{candidates(\_ sender: Any!) -\texttt{>} [Any]!}
+補完ウィンドウに表示する内容を返り値で返すメソッドです。StoreのStateを返すだけにしています。コード\ref{listings:candidates}に、コード例を示します。
+\begin{listing}[h]
+  \begin{minted}[breaklines]{swift}
+public override func candidates(_ sender: Any!) -> [Any]! {
+  // candinates自体は[String]型です
+  return self.store.candinates
+}
+  \end{minted}
+  \caption{candidatesのコード例}\label{listings:candidates}
+\end{listing}
 
 \subsubsection{candidateSelected(\_ candidateString: NSAttributedString!)}
+補完候補を選択した際に呼ばれるメソッドです。選択した文字列をActionに渡します。コード\ref{listings:candidate_selected}に、コード例を示します。
+\begin{listing}[h]
+  \begin{minted}[breaklines]{swift}
+public override func candidateSelected(_ candidateString: NSAttributedString!) {
+    self.store.send(.insertText(
+      candidateString.string
+    ))
+}
+  \end{minted}
+  \caption{candidateSelectedのコード例}\label{listings:candidate_selected}
+\end{listing}
 
 \subsubsection{candidateSelectionChanged(\_ candidateString: NSAttributedString!)}
-
+補完ウィンドウの選択肢を切り替えたとき呼ばれます。コード\ref{listings:candidate_selection_changed}に、コード例を示します。
+\begin{listing}[h]
+  \begin{minted}[breaklines]{swift}
+public override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
+    guard let candidateString = candidateString else { return }
+    self.store.send(.selectedWord(
+      candidateString.string
+    ))
+}
+  \end{minted}
+  \caption{candidateSelectionChangedのコード例}\label{listings:candidate_selection_changed}
+\end{listing}
 
 \section{マルチモジュール構成とfastlaneを用いた効率的なデバッグ}\label{sec:multi_module_and_fastlane}
-マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。
+マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。IMEを開発するうえで単語を補完するためのロジックをデバッグするのが面倒という課題に対して、Swift Package Manager(SPM)を使いマルチモジュール構成にすることで、デバッグ専用アプリを開発しました。図AにRaelizeのモジュール構成を示します。
+
+
+また、fastlaneを用いた効率的なデバッグを行いました。
 
 \section{おわりに}\label{sec:conclusion}
 
