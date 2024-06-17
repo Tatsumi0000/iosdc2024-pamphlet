@@ -1,6 +1,6 @@
 \documentclass[uplatex,a4j,12pt,twocolumn]{jsarticle}
 
-\renewcommand{\baselinestretch}{0.8}
+\renewcommand{\baselinestretch}{1.0}
 % 縦横のサイズ調整
 \usepackage[margin=10mm]{geometry}
 \usepackage[dvipdfmx]{graphicx,hyperref}
@@ -23,9 +23,9 @@
 \begin{document}
 
 
-\title{\vspace{-10mm}InputMethodKitとTCAを使ったmacOS上で動作するIMEの開発}
+\title{InputMethodKitとTCAを使ったmacOS上で動作するIMEの開発}
 \author{Tatsumi0000}
-\date{\vspace{-10mm}}
+\date{}
 \maketitle
 
 \section{はじめに}\label{sec:intro}
@@ -36,8 +36,25 @@ Raelizeを開発するために、Appleが公式で提供しているInputMethod
 
 これらの開発体験を踏まえて本稿では、InputMethodKitとTCAを使ったIME開発や、マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。
 
+今回使用した各ツールのバージョンを表\ref{table:version}に示します。
+\begin{table}[h]
+  \begin{center}
+    \caption{各ツールのバージョン}
+    \begin{tabular}{|l|r|} \hline
+      ツール & バージョン \\ \hline
+      macOS & 14.5 \\
+      Xcode & 15.4 \\
+      Swift & 5.10 \\
+      The Composable Architecture & 1.9.2 \\
+      fastlane & 2.220.0 \\ \hline
+    \end{tabular}
+  \end{center}
+\end{table}\label{table:version}
+
 本稿の構成は以下の通りです。
 第\ref{sec:abount_inputmethodkit}章ではInputMethodKitについて述べます。第\ref{sec:the_composable_architecture}章ではThe Composable Architecture（TCA）について述べます。第\ref{sec:use_imk_and_tca}章ではInputMethodKitとTCAを使ったIME開発について述べます。第\ref{sec:multi_module_and_fastlane}章ではマルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。第\ref{sec:conclusion}章では本稿のまとめと今後の課題を示します。
+
+解説に使用するコードは、\url{https://github.com/Tatsumi0000/Raelize/tree/main}で公開しています。
 
 \section{InputMethodKit}\label{sec:abount_inputmethodkit}
 InputMethodKitについて述べます。InputMethodKitは、macOSでIMEを開発するためのフレームワークで、macOSのIMEとして動作するアプリケーションを開発することができます。
@@ -48,7 +65,7 @@ InputMethodKitは、主に以下の3つのクラスを使って開発します�
     \begin{itemize}
         \item 入力メソッドへのクライアント接続を管理するクラス\cite{bib:imkserver}
     \end{itemize}
-    \newpage
+    % \newpage
     \item IMKCandidates
     \begin{itemize}
         \item 候補ウィンドウを表示するためのクラス\cite{bib:imk_candidates}
@@ -106,7 +123,7 @@ initialState: RaelizeIMKReducer.State(raelizeState: .inputMode),
   \end{minted}
   \caption{IMKInputControllerのイニシャライザでのStateを監視する例}\label{listings:initial_state}
 \end{listing}
-次にIMKInputControllerでよく使うメソッドと、どのようにTCAを組み合わせて実装したか述べます。
+次にIMKInputControllerで使用したメソッドと一緒に、どのようにTCAを組み合わせて実装したか述べます。
 \subsubsection{handle(\_ event: NSEvent!, client sender: Any!) -\texttt{>} Bool}
 このメソッドは、ユーザがキーボードを操作した際に呼ばれるメソッドです。eventにユーザが操作したイベントが格納されているので、このイベントに応じてIMEの状態（RaelizeState）を切り替えます。コード\ref{listings:handle}に、コード例を示します。
 \begin{listing}[h]
@@ -167,13 +184,46 @@ public override func candidateSelectionChanged(_ candidateString: NSAttributedSt
   \caption{candidateSelectionChangedのコード例}\label{listings:candidate_selection_changed}
 \end{listing}
 
-\section{マルチモジュール構成とfastlaneを用いた効率的なデバッグ}\label{sec:multi_module_and_fastlane}
-マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。IMEを開発するうえで単語を補完するためのロジックをデバッグするのが面倒という課題に対して、Swift Package Manager(SPM)を使いマルチモジュール構成にすることで、デバッグ専用アプリを開発しました。図AにRaelizeのモジュール構成を示します。
+\section{マルチモジュール構成とfastlaneを用いた効率的なデバッグなど}\label{sec:multi_module_and_fastlane}
+マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べます。Swift Package Manager(SPM)を使ったマルチモジュール構成にすることで、単語を補完するためのロジックをデバッグ専用のアプリが開発しやすくなりました。単語補完ロジックをデバッグするだけのアプリを開発しやすくなりました。図\ref{fig:raelize_architecture}にRaelizeのモジュール構成を示します。
 
+\begin{figure}[h]
+  \begin{center}
+      \includegraphics[width=7cm]{image/architecture.png}
+      \caption{Raelizeのモジュール構成}
+      \label{fig:raelize_architecture}
+  \end{center}
+\end{figure}
 
-また、fastlaneを用いた効率的なデバッグを行いました。
+また、fastlaneを用いたビルドの自動化を行いました。IMEは通常のアプリケーションと異なり、ビルドしたファイルを特定のディレクトリに配置し、IMEのプロセスをkillすることでようやく使うことが出来ます\cite{bib:input_method_kit_tips}。これを毎回手動で実施するのは大変なので、fastlaneを用いて自動化しました。実際のコード例をコード\ref{listings:fastlane}に示します。
+
+\begin{listing}[h]
+  \begin{minted}[breaklines]{ruby}
+default_platform(:mac)
+platform :mac do
+  desc "Build macOS App"
+  lane :app_build do
+  ime_path = "/Library/Input Methods"
+    build_mac_app(
+    configuration: "Debug",
+    export_method: "development",
+    scheme: "Raelize",
+    output_directory: "#{ENV["HOME"]}#{ime_path}",
+    clean: true
+    )
+    sh("pkill", "Raelize")
+  end
+end
+  \end{minted}
+  \caption{fastlaneを使ったビルド自動化}\label{listings:fastlane}
+\end{listing}
+
+コード\ref{listings:fastlane}を実行することで、IMEを使うことができるのですが、稀にIMEが起動しない場合があります。この場合は、PCをログアウト後再ログインすることで解決します。
+
+IME開発中にprintデバッグをしたい場合はprintを使うのではなく、NSLogを使うことで、ログをConsoleアプリ\cite{bib:console}に出力します。そのまま使うとIME以外のログも大量に出力されて、分かりにくいため、Consoleアプリの右上からフィルタリング（アプリ名などで）を行い、IMEのログだけを出力することをおすすめします。
 
 \section{おわりに}\label{sec:conclusion}
+本稿では、InputMethodKitとTCAを使ったIME開発や、マルチモジュール構成とfastlaneを用いた効率的なデバッグについて述べました。InputMethodKitとTCAを一緒に使い開発することでコードの見通しをよくしつつ開発することが出来ました。他にもマルチモジュール構成とfastlaneを用いることで、効率的なデバッグを行うことができました。
 
 %参考文献
 \bibliography{iosdc2024} 
